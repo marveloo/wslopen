@@ -26,6 +26,7 @@ Examples:
 
 open()
 {
+    local powershell
     if ! powershell=$(command -v PowerShell.exe) || ! [ -x "$powershell" ]; then
         echo "PowerShell.exe executable not found in PATH" >&2; return 3
     fi
