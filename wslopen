@@ -1,0 +1,86 @@
+#!/bin/sh
+
+PROGRAM_NAME=${0##*/}
+
+help()
+{
+    echo "\
+Usage: $PROGRAM_NAME [--] <file-path> | <uri>
+
+The $PROGRAM_NAME utility opens a file or URI in the user's preferred
+Windows application for files or URIs of that type.
+
+Exit codes:
+   0   file path or URI successfully dispatched to be handled by Windows
+   1   cannot find or access the file specified
+  >1   an error occurred
+
+Examples:
+   $PROGRAM_NAME \"https://example.com/?foo=bar\"
+   $PROGRAM_NAME file:///path/to/foobar.txt
+   $PROGRAM_NAME mailto:foobar@example.com
+   $PROGRAM_NAME foobar.jpg
+   $PROGRAM_NAME ./
+    "
+}
+
+open()
+{
+    if ! powershell=$(command -v PowerShell.exe) || ! [ -x "$powershell" ]; then
+        echo "PowerShell.exe executable not found in PATH" >&2; return 3
+    fi
+
+    local ref
+    ref="$(printf %s "$1" | head -n1)"
+
+    if [ -e "$ref" ] || ! printf %s "$ref" | grep -Eiq '^[a-z][a-z0-9.+-]*:'; then
+
+        ref=$(wslpath -w "$ref") || return 1
+
+    elif printf %s "$ref" | grep -Eiq '^file:/($|[^/]|//|/localhost/)'; then
+
+        ref=${ref#*:/}
+        ref=/${ref#/*/}
+        ref=file:$(wslpath -am "$ref") || return 1
+
+    fi
+
+    PowerShell.exe -Command "Start-Process '$(printf %s "$ref" | sed "s/'/''/g")'" || return 1
+}
+
+# # # # # Parse options # # # # #
+
+show_help=false
+has_flags=false
+
+while getopts h-: flag
+do
+    [ "$flag" = - ] && flag="--$OPTARG" || flag="-$flag"
+
+    case "$flag" in
+        -h | --help )
+            show_help=true ;;
+        --* )
+            echo "Illegal option $flag" >&2; exit 2 ;;
+        -\? )
+            exit 2
+    esac
+
+    has_flags=true
+done
+
+shift $((OPTIND - 1))
+
+# # # # # # # Main # # # # # # #
+
+if [ "$has_flags" = false ] && [ $# -eq 0 ]; then
+    help; exit 2
+fi
+
+if [ "$show_help" = true ]; then
+    help; exit 0
+fi
+
+if [ $# -gt 0 ]; then
+    open "$1"
+fi
