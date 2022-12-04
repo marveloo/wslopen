@@ -1,6 +1,7 @@
 #!/bin/sh
 
 PROGRAM_NAME=${0##*/}
+REPORT_BUGS_URL="https://github.com/marveloo/wslopen/issues"
 
 help()
 {
@@ -16,12 +17,13 @@ Exit codes:
   >1   an error occurred
 
 Examples:
-   $PROGRAM_NAME \"https://example.com/?foo=bar\"
-   $PROGRAM_NAME file:///path/to/foobar.txt
-   $PROGRAM_NAME mailto:foobar@example.com
+   $PROGRAM_NAME 'https://example.com/?foo=bar'
+   $PROGRAM_NAME 'mailto:foo@example.com'
+   $PROGRAM_NAME 'file:///path/to/foo.txt'
    $PROGRAM_NAME foobar.jpg
    $PROGRAM_NAME ./
-    "
+
+Report bugs at: $REPORT_BUGS_URL"
 }
 
 open()
