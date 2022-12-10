@@ -14,7 +14,8 @@ Windows application for files or URIs of that type.
 Exit codes:
    0   file path or URI successfully dispatched to be handled by Windows
    1   cannot find or access the file specified
-  >1   an error occurred
+   2   command line syntax error
+  >2   an error occurred
 
 Examples:
    $PROGRAM_NAME 'https://example.com/?foo=bar'
