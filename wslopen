@@ -26,12 +26,24 @@ Examples:
 Report bugs at: $REPORT_BUGS_URL"
 }
 
+check_prerequisites()
+{
+    if ! [ -x "$(command -v wslpath)" ]; then
+        echo "$PROGRAM_NAME requires Windows 10, version 1803 or newer." >&2; return 3
+    fi
+
+    if ! [ -x "$(command -v PowerShell.exe)" ]; then
+        if [ "$SUDO_UID" ]; then
+            echo "Running $PROGRAM_NAME via sudo is not supported." >&2; return 3
+        else
+            echo "PowerShell.exe executable not found in PATH." >&2; return 3
+        fi
+    fi
+}
+
 open()
 {
-    local powershell
-    if ! powershell=$(command -v PowerShell.exe) || ! [ -x "$powershell" ]; then
-        echo "PowerShell.exe executable not found in PATH" >&2; return 3
-    fi
+    check_prerequisites || return
 
     local ref
     ref="$(printf %s "$1" | head -n1)"
