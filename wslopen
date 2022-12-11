@@ -30,21 +30,25 @@ Report bugs at: $REPORT_BUGS_URL"
 check_prerequisites()
 {
     if ! [ -x "$(command -v wslpath)" ]; then
-        echo "$PROGRAM_NAME requires Windows 10, version 1803 or newer." >&2; return 3
+        echo "$PROGRAM_NAME requires Windows 10, version 1803 or newer." >&2
+        return 1
     fi
 
     if ! [ -x "$(command -v PowerShell.exe)" ]; then
         if [ "$SUDO_UID" ]; then
-            echo "Running $PROGRAM_NAME via sudo is not supported." >&2; return 3
+            echo "Running $PROGRAM_NAME via sudo is not supported." >&2
         else
-            echo "PowerShell.exe executable not found in PATH." >&2; return 3
+            echo "PowerShell.exe executable not found in PATH." >&2
         fi
+        return 1
     fi
+
+    return 0
 }
 
 open()
 {
-    check_prerequisites || return
+    check_prerequisites || return 3
 
     local ref
     ref="$(printf %s "$1" | head -n1)"
